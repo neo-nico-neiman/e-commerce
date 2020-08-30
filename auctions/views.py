@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listing, WatchList, Bids
+from .models import User, Listing, WatchList, Bids, Comments
 
 
 def index(request):
@@ -66,21 +66,19 @@ def register(request):
 
 def new_listing(request):
     if request.method == 'POST':
-        title = request.POST['title']
-        description = request.POST['description']
-        imageUrl = request.POST['image_url']
-        startingBid = request.POST['starting_bid']
-        category = request.POST['category']
         listing = Listing(
-            user_id= request.user.id,
-            title = title,
-            description = description,
-            image_url = imageUrl,
-            starting_bid = startingBid,
-            category = category
+            user = User.objects.get(pk=request.user.id),
+            title = request.POST['title'],
+            description = request.POST['description'],
+            image_url = request.POST['image_url'],
+            starting_bid = request.POST['starting_bid'],
+            category = request.POST['category']
         )
         listing.save()
-        return HttpResponseRedirect(reverse("index"))
+        return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'comments': listing.comment_listing.all()
+    })
     return render(request, "auctions/create_listing.html")
 
 def listing(request, listingId):
@@ -93,6 +91,7 @@ def listing(request, listingId):
         print( e )
     return render(request, "auctions/listing_page.html", {
         'listing': listing,
+        'comments': listing.comment_listing.all(),
         'watch': is_watchlist
     })
 
@@ -110,14 +109,16 @@ def watchlist( request, listingId):
         watchlists.delete()
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
-        'watch': False
+        'watch': False,
+        'comments': listing.comment_listing.all()
         })
     else:  
         watchlist = WatchList(listing_id=listingId, user_id=request.user.id)
         watchlist.save()
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
-        'watch': True
+        'watch': True,
+        'comments': listing.comment_listing.all()
         } )
 
 def bid(request, listingId):
@@ -131,11 +132,34 @@ def bid(request, listingId):
         })
     else:
         listing.current_price=request.POST['bid']
+        listing.highest_bidder = User.objects.get(pk=request.user.id)
         listing.save()
         bid = Bids(listing=listing, user=User.objects.get(pk=request.user.id), amount=request.POST['bid'])
         print(999, listing)
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
         'watch': True,
-        'message': 'Your bid as been accepted!'
+        'message': 'Your bid as been accepted!',
+        'comments': listing.comment_listing.all()
+        })
+
+def closeListing(request, listingId):
+    listing = Listing.objects.get(pk=listingId)
+    listing.is_active = False
+    listing.save()
+    return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'comments': listing.comment_listing.all()
+        })
+def comments(request, listingId):
+    listing = Listing.objects.get(pk=listingId)
+    comment = Comments(
+        content = request.POST['content'],
+        listing = listing,
+        user = User.objects.get(pk=request.user.id)
+    )
+    comment.save()
+    return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'comments': listing.comment_listing.all()
         })

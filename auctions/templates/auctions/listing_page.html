@@ -2,21 +2,41 @@
 
 {% block body %}
     <h2>Listing: {{ listing.title }}</h2>
-    {% if request.user.is_authenticated %}
-        <form action="{% url 'watchlist' listing.id %}" method="POST">
-            {% csrf_token %}
-            {% if watch %}
-                <button type="submit">Remove from Watchlist</button>
-            {% else %}
-                <button type="submit">Add to Watchlist</button>
-            {% endif %}
-        </form>    
-    {% else %}
+    {% if listing.highest_bidder == request.user and not listing.is_active %}
+        <p class="text-success">Congrats! You are the winner for this listing!</p>
+    {% elif not listing.is_active %}
+        <p class="text-danger">This listing is closed</p>
     {% endif %}
-        <img src="{{ listing.image_url }}" alt="{{ listing.title }}"/>
-        <p>Description: {{ listing.description }}</p>
-        <h6>Current Price: ${{ listing.current_price }}</h6><span class="text-danger">{{ message }}</span>
-    {% if user.is_authenticated %}
+    <div>
+        <!-- Add or Remove from WatchList -->
+        {% if request.user.is_authenticated %}
+            <form action="{% url 'watchlist' listing.id %}" method="POST">
+                {% csrf_token %}
+                {% if watch %}
+                    <button type="submit">Remove from Watchlist</button>
+                {% else %}
+                    <button type="submit">Add to Watchlist</button>
+                {% endif %}
+            </form>    
+        {% else %}
+        {% endif %}
+        <!-- Close  the listing-->
+        {% if request.user.id == listing.user.id %}
+            <form action="{% url 'closeListing' listing.id %}" method="POST">
+                {% csrf_token %}
+                {% if listing.is_active %}
+                    <button type="submit">Close Listing</button>
+                {% else %}
+                    <button type="submit" disabled>Close Listing</button>
+                {% endif %}
+            </form>    
+        {% endif %}
+    </div>
+
+    <img src="{{ listing.image_url }}" alt="{{ listing.title }}"/>
+    <p>Description: {{ listing.description }}</p>
+    <h6>Current Price: ${{ listing.current_price }}</h6><span class="text-danger">{{ message }}</span>
+    {% if user.is_authenticated and listing.is_active%}
         <form action="{% url 'bid' listing.id %}" method="POST">
             {% csrf_token %}
             <label for="bid">Make a bid</label>
@@ -24,4 +44,17 @@
             <input type="submit">
         </form>
     {% endif %}
+    <!-- Comments -->
+    <h6>Comments</h6>
+    {% for comment in comments %}
+        <p class="font-weight-bold">{{ comment.user }}</p>
+        <p>{{ comment.content }}</p>
+    {% empty %}
+        <p>Be the first to add a comment</p>
+    {% endfor %}
+    <form action="{% url 'comments' listing.id %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="content">
+        <input type="submit">
+    </form>
 {% endblock %}
