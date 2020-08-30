@@ -6,7 +6,9 @@
     {% for listing in listings %}
     <ul>
         <li>
-            {% include "./listing.html" with title=listing.title description=listing.description image_url=listing.image_url price=listing.current_price %}
+            <a href="{% url 'listing' listing.id %}" class="listing" >
+                {% include "./listing.html" with listing=listing %}
+            </a>
         </li>
     </ul>
     {% endfor %}

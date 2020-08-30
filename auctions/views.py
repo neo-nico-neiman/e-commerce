@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listing
+from .models import User, Listing, WatchList, Bids
 
 
 def index(request):
@@ -72,7 +72,7 @@ def new_listing(request):
         startingBid = request.POST['starting_bid']
         category = request.POST['category']
         listing = Listing(
-            owner_id= request.user.id,
+            user_id= request.user.id,
             title = title,
             description = description,
             image_url = imageUrl,
@@ -82,3 +82,60 @@ def new_listing(request):
         listing.save()
         return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/create_listing.html")
+
+def listing(request, listingId):
+    listing = Listing.objects.get( pk=listingId )
+    is_watchlist = True
+    try:
+        watchlist = WatchList.objects.get( listing_id=listingId, user_id=User.objects.get(request.user.id))
+        is_watchlist = False
+    except Exception as e:
+        print( e )
+    return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'watch': is_watchlist
+    })
+
+def watchlist( request, listingId):
+    is_watchlist = False
+    try:
+        watchlist = WatchList.objects.get(listing_id=listingId, user_id=request.user.id)
+        if watchlist is not None:
+            is_watchlist = True
+    except:
+        is_watchlist = False
+
+    listing = Listing.objects.get( pk=listingId )
+    if is_watchlist:
+        watchlists.delete()
+        return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'watch': False
+        })
+    else:  
+        watchlist = WatchList(listing_id=listingId, user_id=request.user.id)
+        watchlist.save()
+        return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'watch': True
+        } )
+
+def bid(request, listingId):
+    listing = Listing.objects.get(pk=listingId)
+    bid = float(request.POST['bid'])
+    if bid < listing.current_price or bid < listing.starting_bid:
+        return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'watch': True,
+        'message': 'Your bid must be higher'
+        })
+    else:
+        listing.current_price=request.POST['bid']
+        listing.save()
+        bid = Bids(listing=listing, user=User.objects.get(pk=request.user.id), amount=request.POST['bid'])
+        print(999, listing)
+        return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'watch': True,
+        'message': 'Your bid as been accepted!'
+        })

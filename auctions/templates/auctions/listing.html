@@ -1,15 +1,12 @@
-<div class="listing">
-    <table>
-        <th><h4>{{ title }}</h4></th>
-        <tr>
-            <td><img src="{{ image_url }}" alt="{{ title }}" /></td>
-            <td>
-                <table>
-                    <tr><td><h6>Description: {{ description }}</h6></td></tr>
-                    <tr><td><h6>Current Price: ${{ price }}</h6></td></tr>
-                    <tr></tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</div>
+<table>
+    <th><h4>{{ listing.title }}</h4></th>
+    <tr>
+        <td><img src="{{ listing.image_url }}" alt="{{ listing.title }}" /></td>
+        <td>
+            <table>
+                <tr><td><h6>Description: {{ listing.description }}</h6></td></tr>
+                <tr><td><h6>Current Price: ${{ listing.current_price }}</h6></td></tr>
+            </table>
+        </td>
+    </tr>
+</table>

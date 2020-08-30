@@ -8,12 +8,18 @@ li {
     padding: 0px;
 }
 .listing {
-    border: 1px solid darkslategrey;
-    border-radius: 4px;
     padding: 20px 30px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    color: black;
+    border: 1px solid darkslategrey;
+    border-radius: 4px;
+}
+
+.listing:hover {
+    background-color: lightskyblue;
+    text-decoration: none;
 }
 
 td > img {
@@ -21,3 +27,4 @@ td > img {
     width: 300px;
     margin-right: 40px;
 }
+
