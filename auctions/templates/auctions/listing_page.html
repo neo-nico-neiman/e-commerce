@@ -10,11 +10,13 @@
     <div>
         <!-- Add or Remove from WatchList -->
         {% if request.user.is_authenticated %}
-            <form action="{% url 'watchlist' listing.id %}" method="POST">
+            <form action="{% url 'listing' listing.id %}" method="POST">
                 {% csrf_token %}
                 {% if watch %}
+                    <input type="radio" name="watchList" value="0" hidden/>
                     <button type="submit">Remove from Watchlist</button>
                 {% else %}
+                    <input type="radio" name="watchList" value="1" hidden/>
                     <button type="submit">Add to Watchlist</button>
                 {% endif %}
             </form>    

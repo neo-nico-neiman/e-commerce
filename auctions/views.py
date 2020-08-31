@@ -82,13 +82,23 @@ def new_listing(request):
     return render(request, "auctions/create_listing.html")
 
 def listing(request, listingId):
+    is_watchList = True
     listing = Listing.objects.get( pk=listingId )
-    is_watchlist = True
     try:
-        watchlist = WatchList.objects.get( listing_id=listingId, user_id=User.objects.get(request.user.id))
-        is_watchlist = False
+        if request.POST['watchList']:
+            is_watchList = request.POST['watchList']
+            if is_watchList:
+                watchListing = WatchList(listing=listing, user=User.objects.get(pk=request.user.id))
+                watchlist.save()
+            else:
+                watchlist = WatchList.objects.get(listing=listing, user=User.objects.get(pk=request.user.id))
+                watchlist.delete()
+        else:
+            watchlist = WatchList.objects.get( listing_id=listingId, user_id=User.objects.get(request.user.id))
+            is_watchlist = False if not watchlist else True
     except Exception as e:
         print( e )
+
     return render(request, "auctions/listing_page.html", {
         'listing': listing,
         'comments': listing.comment_listing.all(),
