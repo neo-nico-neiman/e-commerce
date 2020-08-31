@@ -124,18 +124,18 @@ def watchlist( request, listingId):
 def bid(request, listingId):
     listing = Listing.objects.get(pk=listingId)
     bid = float(request.POST['bid'])
-    if bid < listing.current_price or bid < listing.starting_bid:
+    if bid <= listing.current_price or bid < listing.starting_bid:
+        minimunBid = (listing.current_price + 1) if listing.starting_bid < listing.current_price else listing.starting_bid
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
         'watch': True,
-        'message': 'Your bid must be higher'
+        'message': f'Your bid must be at least {minimunBid}'
         })
     else:
         listing.current_price=request.POST['bid']
         listing.highest_bidder = User.objects.get(pk=request.user.id)
         listing.save()
         bid = Bids(listing=listing, user=User.objects.get(pk=request.user.id), amount=request.POST['bid'])
-        print(999, listing)
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
         'watch': True,

@@ -35,26 +35,32 @@
 
     <img src="{{ listing.image_url }}" alt="{{ listing.title }}"/>
     <p>Description: {{ listing.description }}</p>
-    <h6>Current Price: ${{ listing.current_price }}</h6><span class="text-danger">{{ message }}</span>
+    <h6>Current Price: ${{ listing.current_price }}</h6><span class="text-warning">{{ message }}</span>
     {% if user.is_authenticated and listing.is_active%}
         <form action="{% url 'bid' listing.id %}" method="POST">
             {% csrf_token %}
-            <label for="bid">Make a bid</label>
-            <input type="number" name="bid">
-            <input type="submit">
+            <input type="number" name="bid" placeholder="Bid">
+            <input type="submit" value="Place Bid">
         </form>
     {% endif %}
     <!-- Comments -->
-    <h6>Comments</h6>
+    <hr>
+    <h4>Comments</h4>
     {% for comment in comments %}
-        <p class="font-weight-bold">{{ comment.user }}</p>
+        <p class="font-weight-bold bg-dark text-white">{{ comment.user }}</p>
         <p>{{ comment.content }}</p>
     {% empty %}
-        <p>Be the first to add a comment</p>
+        {% if user.is_authenticated %}    
+            <p>Be the first to add a comment</p>
+        {% else %}
+            <p>Login to add a comment</p>    
+        {% endif %}
     {% endfor %}
-    <form action="{% url 'comments' listing.id %}" method="POST">
-        {% csrf_token %}
-        <input type="text" name="content">
-        <input type="submit">
-    </form>
+    {% if user.is_authenticated %}
+        <form action="{% url 'comments' listing.id %}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="content">
+            <input type="submit">
+        </form>
+    {% endif %}
 {% endblock %}
