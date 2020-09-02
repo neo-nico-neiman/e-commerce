@@ -21,6 +21,18 @@ li {
     background-color: lightskyblue;
     text-decoration: none;
 }
+.category-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+.category {
+    margin: 10px 10px;
+    padding: 5px 5px;
+    color: black;
+    border: 1px solid darkslategrey;
+    border-radius: 4px;
+    white-space: nowrap;
+}
 
 td > img {
     align-self: center;

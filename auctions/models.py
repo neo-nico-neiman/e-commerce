@@ -16,7 +16,7 @@ class Listing(models.Model):
     detail_three = models.CharField(blank=True, max_length=64)
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(default=1, max_digits=10, decimal_places=2)
-    image_url = models.CharField(max_length=256)
+    image_url = models.CharField(max_length=256, default='https://images.unsplash.com/photo-1525610268297-344cdb8dc9af?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60')
     category = models.CharField(max_length=64)
     highest_bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winner", default=1)
     is_active = models.BooleanField(default=True)

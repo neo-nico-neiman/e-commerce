@@ -82,34 +82,47 @@ def new_listing(request):
     return render(request, "auctions/create_listing.html")
 
 def listing(request, listingId):
-    is_watchList = True
+    is_watchList = False
     listing = Listing.objects.get( pk=listingId )
     try:
-        if request.POST['watchList']:
-            is_watchList = request.POST['watchList']
-            if is_watchList:
-                watchListing = WatchList(listing=listing, user=User.objects.get(pk=request.user.id))
-                watchlist.save()
-            else:
-                watchlist = WatchList.objects.get(listing=listing, user=User.objects.get(pk=request.user.id))
-                watchlist.delete()
-        else:
-            watchlist = WatchList.objects.get( listing_id=listingId, user_id=User.objects.get(request.user.id))
-            is_watchlist = False if not watchlist else True
+        watchList = WatchList(listing=listing, user=User.objects.get(pk=request.user.id))
+        is_watchList = True
     except Exception as e:
-        print( e )
+        print('ostro')
+        is_watchList = False
+    if request.method == 'POST':
+        try:
+            is_watchList = request.POST['watchList']
+            if is_watchList == 'add':
+                watchList = WatchList(listing=listing, user=User.objects.get(pk=request.user.id))
+                watchList.save()
+                is_watchList = True
+            else:
+                watchList = WatchList.objects.get(listing=listing, user=User.objects.get(pk=request.user.id))
+                watchList.delete()
+            
+        except Exception as e:
+            print( e )
+            watchList = WatchList.objects.get(listing=listing, user=User.objects.get(pk=request.user.id))
+            is_watchList = True if watchList else False
 
+        return render(request, "auctions/listing_page.html", {
+        'listing': listing,
+        'comments': listing.comment_listing.all(),
+        'watch': is_watchList
+    })
+    print( 555, is_watchList)
     return render(request, "auctions/listing_page.html", {
         'listing': listing,
         'comments': listing.comment_listing.all(),
-        'watch': is_watchlist
+        'watch': is_watchList
     })
 
 def watchlist( request, listingId):
     is_watchlist = False
     try:
-        watchlist = WatchList.objects.get(listing_id=listingId, user_id=request.user.id)
-        if watchlist is not None:
+        watchList = WatchList.objects.get(listing_id=listingId, user_id=request.user.id)
+        if watchList is not None:
             is_watchlist = True
     except:
         is_watchlist = False
@@ -123,8 +136,8 @@ def watchlist( request, listingId):
         'comments': listing.comment_listing.all()
         })
     else:  
-        watchlist = WatchList(listing_id=listingId, user_id=request.user.id)
-        watchlist.save()
+        watchList = WatchList(listing_id=listingId, user_id=request.user.id)
+        watchList.save()
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
         'watch': True,
@@ -173,3 +186,17 @@ def comments(request, listingId):
         'listing': listing,
         'comments': listing.comment_listing.all()
         })
+def categories(request):
+    categories = Listing.objects.filter(category__isnull=False).values('category')
+    return render(request, "auctions/categories.html", {
+        'categories': categories
+    })
+
+def category(request, category):
+    x = f' my {category}'
+    print(type(category))
+    listings = Listing.objects.filter(category=str(category))
+    print(999, listings)
+    return render(request, "auctions/category.html", {
+        'listings': listings
+    })

@@ -13,10 +13,10 @@
             <form action="{% url 'listing' listing.id %}" method="POST">
                 {% csrf_token %}
                 {% if watch %}
-                    <input type="radio" name="watchList" value="0" hidden/>
+                    <input type="text" name="watchList" value='remove' hidden/>
                     <button type="submit">Remove from Watchlist</button>
                 {% else %}
-                    <input type="radio" name="watchList" value="1" hidden/>
+                    <input type="text" name="watchList" value='add' hidden/>
                     <button type="submit">Add to Watchlist</button>
                 {% endif %}
             </form>    
