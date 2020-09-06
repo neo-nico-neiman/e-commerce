@@ -2,14 +2,12 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-
-    {% for listing in listings %}
-    <ul>
-        <li>
+    <div class="container">
+        {% for listing in listings %}
             <a href="{% url 'listing' listing.id %}" class="listing" >
                 {% include "./listing.html" with listing=listing %}
             </a>
-        </li>
-    </ul>
-    {% endfor %}
+        {% endfor %}
+    </div>
+    
 {% endblock %}

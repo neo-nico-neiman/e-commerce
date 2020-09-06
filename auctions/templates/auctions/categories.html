@@ -2,9 +2,9 @@
 
 {% block body %}
     <h2>Categories</h2>
-    <div class="category-container">
+    <div class="container">
         {% for category in categories %}
-            <a href="{% url 'category' category %}"  class="category">
+            <a href="{% url 'category' category.category %}"  class="category">
                 {{ category.category }}
             </a>
         {% empty %}

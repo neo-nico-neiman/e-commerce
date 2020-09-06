@@ -10,21 +10,33 @@ li {
 .listing {
     padding: 20px 30px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-wrap: wrap;
     color: black;
     border: 1px solid darkslategrey;
     border-radius: 4px;
+    max-width: 400px;
+    margin: 10px;
 }
 
 .listing:hover {
     background-color: lightskyblue;
     text-decoration: none;
+    box-shadow: 0px 0px 30px lightslategray;
 }
-.category-container {
+.container {
     display: flex;
     flex-wrap: wrap;
+    min-width: fit-content;
 }
+
+.img-container{
+    max-width: 300px;
+    max-height: 200px;
+    overflow: hidden;
+    display: flex;
+    align-content: center;
+}
+
 .category {
     margin: 10px 10px;
     padding: 5px 5px;
@@ -34,7 +46,7 @@ li {
     white-space: nowrap;
 }
 
-td > img {
+div > img {
     align-self: center;
     width: 300px;
     margin-right: 40px;

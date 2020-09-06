@@ -187,16 +187,13 @@ def comments(request, listingId):
         'comments': listing.comment_listing.all()
         })
 def categories(request):
-    categories = Listing.objects.filter(category__isnull=False).values('category')
+    categories = Listing.objects.filter(category__isnull=False).values('category').distinct()
     return render(request, "auctions/categories.html", {
         'categories': categories
     })
 
 def category(request, category):
-    x = f' my {category}'
-    print(type(category))
     listings = Listing.objects.filter(category=str(category))
-    print(999, listings)
     return render(request, "auctions/category.html", {
         'listings': listings
     })
