@@ -1,72 +1,77 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Listing: {{ listing.title }}</h2>
-    {% if listing.highest_bidder == request.user and not listing.is_active %}
-        <p class="text-success">Congrats! You are the winner for this listing!</p>
-    {% elif not listing.is_active %}
-        <p class="text-danger">This listing is closed</p>
-    {% endif %}
-    <div>
-        <!-- Add or Remove from WatchList -->
-        {% if request.user.is_authenticated %}
-            <form action="{% url 'listing' listing.id %}" method="POST">
-                {% csrf_token %}
-                {% if watchList %}
-                    <input type="text" name="watchList" value=0 hidden/>
-                    <button type="submit">Remove from Watchlist</button>
-                {% else %}
-                    <input type="text" name="watchList" value=1 hidden/>
-                    <button type="submit">Add to Watchlist</button>
-                {% endif %}
-            </form>
-        {% endif %}
-            
-        <!-- Close  the listing-->
-        {% if request.user.id == listing.user.id %}
-            <form action="{% url 'closeListing' listing.id %}" method="POST">
-                {% csrf_token %}
-                {% if listing.is_active %}
-                    <button type="submit">Close Listing</button>
-                {% else %}
-                    <button type="submit" disabled>Close Listing</button>
-                {% endif %}
-            </form>    
-        {% endif %}
-    </div>
-
-    <img src="{{ listing.image_url }}" alt="{{ listing.title }}"/>
-    <p>Description: {{ listing.description }}</p>
-    <h6>Current Price: ${{ listing.current_price }}</h6><span class="text-warning">{{ message }}</span>
-    {% if user.is_authenticated and listing.is_active%}
-        <form action="{% url 'bid' listing.id %}" method="POST">
-            {% csrf_token %}
-            <input type="number" name="bid" placeholder="Bid">
-            <input type="submit" value="Place Bid">
-        </form>
-    {% endif %}
-    <!-- Comments -->
-    <hr>
-    <h4>Comments</h4>
-    {% for comment in comments %}
-        <strong>{{ comment.user|capfirst }}:</strong>
-        <span>{{ comment.content }}</span>
-        </br>
-        <small>{{comment.created_at}}</small>
-        </br>
-        <hr>
-    {% empty %}
-        {% if user.is_authenticated %}    
-            <p>Be the first to add a comment</p>
+<h2>Listing: {{ listing.title }}</h2>
+{% if listing.highest_bidder == request.user and not listing.is_active %}
+<p class="text-success">Congrats! You are the winner for this listing!</p>
+{% elif not listing.is_active %}
+<p class="text-danger">This listing is closed</p>
+{% endif %}
+<div>
+    <!-- Add or Remove from WatchList -->
+    {% if request.user.is_authenticated %}
+    <form action="{% url 'listing' listing.id %}" method="POST">
+        {% csrf_token %}
+        {% if watchList %}
+        <input type="text" name="watchList" value=0 hidden />
+        <input type="submit" value="Remove from Watchlist" />
         {% else %}
-            <p>Login to add a comment</p>    
+        <input type="text" name="watchList" value=1 hidden />
+        <input type="submit" value="Add to Watchlist" />
         {% endif %}
-    {% endfor %}
-    {% if user.is_authenticated %}
-        <form action="{% url 'comments' listing.id %}" method="POST">
-            {% csrf_token %}
-            {{ commentForm }}
-            <input type="submit">
-        </form>
+    </form>
     {% endif %}
+
+    <!-- Close  the listing-->
+    {% if request.user.id == listing.user.id %}
+    <form action="{% url 'closeListing' listing.id %}" method="POST">
+        {% csrf_token %}
+        {% if listing.is_active %}
+        <input type="submit" value="Close Listing" />
+        {% else %}
+        <input type="submit" disabled value="Close Listing" />
+        {% endif %}
+    </form>
+    {% endif %}
+</div>
+
+<img src="{{ listing.image_url }}" alt="{{ listing.title }}" class="img-container" />
+<p><strong>Description:</strong> {{ listing.description }}</p>
+<p><strong>Price:</strong> ${{ listing.current_price }}</p>
+<h6 class="text-warning">{{ message }}</h6>
+{% if user.is_authenticated and listing.is_active%}
+<form action="{% url 'bid' listing.id %}" method="POST">
+    {% csrf_token %}
+    <div class="bidContainer">
+        <input type="number" name="bid" placeholder="Bid">
+        <input type="submit" value="Place Bid">
+    </div>
+</form>
+{% endif %}
+<!-- Comments -->
+<hr>
+<h4>Comments</h4>
+{% for comment in comments %}
+<strong>{{ comment.user|capfirst }}:</strong>
+<span>{{ comment.content }}</span>
+</br>
+<small>{{comment.created_at}}</small>
+</br>
+<hr>
+{% empty %}
+{% if user.is_authenticated %}
+<p>Be the first to add a comment</p>
+{% else %}
+<p>Login to add a comment</p>
+{% endif %}
+{% endfor %}
+{% if user.is_authenticated %}
+<form action="{% url 'comments' listing.id %}" method="POST">
+    {% csrf_token %}
+    <div class="bidContainer">
+        {{ commentForm }}
+        <input type="submit">
+    </div>
+</form>
+{% endif %}
 {% endblock %}

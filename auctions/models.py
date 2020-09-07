@@ -33,6 +33,7 @@ class Listing(models.Model):
 
     def __str__(self):
         return f'Title: {self.title} - Description: {self.description} - Current Price: {self.current_price}'
+
 class WatchList(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="watch_listing")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watch_user")

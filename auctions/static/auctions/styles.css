@@ -1,5 +1,5 @@
 body {
-    padding: 10px;
+    padding: 0px 10px 40px 10px;
 }
 
 li {
@@ -9,19 +9,23 @@ li {
 }
 
 a {
-    color: black;
+    color: whitesmoke;
 }
 
 a:hover {
-    color: whitesmoke;
+    color: #FC4445;
 }
 
 .navbar {
     display: flex;
     flex-wrap: wrap;
     justify-content: start;
-    background-color: #0CB03B;
-    border-radius: 8px;
+    background-color: #3D1111;
+    height: 4em;
+}
+
+.brand {
+    color: #FC4445;
 }
 
 .listing {
@@ -56,6 +60,11 @@ a:hover {
     align-content: center;
 }
 
+.bidContainer{
+    display:flex;
+    justify-content: space-between;
+    width: 300px;
+}
 .category {
     margin: 10px 10px;
     padding: 10px 40px;
@@ -85,10 +94,22 @@ div > img {
 }
 
 input, select{
-    border-radius: 8px;
-    border: 1px solid lightblue;
+    border-radius: 4px;
+    border: 1px solid #3D1111;
+    padding-left: 10px;
 }
 
-.actionColor{
-    background-color: #0CB03B;
+input[type=submit] {
+    background-color: #BD3333;
+    color: whitesmoke;
+    border-radius: 4px;
+    display: flex;
+    margin: 5px 0px;
+    font-size: 80%;
+    justify-content: center;
+}
+
+input[type=submit]:hover {
+    background-color: #FC4445;
+    color: whitesmoke;
 }
