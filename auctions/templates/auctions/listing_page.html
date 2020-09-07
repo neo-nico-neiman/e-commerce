@@ -37,7 +37,7 @@
 
 <img src="{{ listing.image_url }}" alt="{{ listing.title }}" class="img-container" />
 <p><strong>Description:</strong> {{ listing.description }}</p>
-<p><strong>Price:</strong> ${{ listing.current_price }}</p>
+<p><strong>Current Price:</strong> ${{ listing.current_price }}</p>
 <h6 class="text-warning">{{ message }}</h6>
 {% if user.is_authenticated and listing.is_active%}
 <form action="{% url 'bid' listing.id %}" method="POST">
