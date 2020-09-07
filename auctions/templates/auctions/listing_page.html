@@ -49,8 +49,10 @@
     <hr>
     <h4>Comments</h4>
     {% for comment in comments %}
-        <span class="">{{ comment.user|capfirst }}:</span>
+        <strong>{{ comment.user|capfirst }}:</strong>
         <span>{{ comment.content }}</span>
+        </br>
+        <small>{{comment.created_at}}</small>
         </br>
         <hr>
     {% empty %}

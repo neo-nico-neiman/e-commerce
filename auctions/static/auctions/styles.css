@@ -88,3 +88,7 @@ input, select{
     border-radius: 8px;
     border: 1px solid lightblue;
 }
+
+.actionColor{
+    background-color: #0CB03B;
+}
