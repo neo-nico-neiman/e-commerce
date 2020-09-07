@@ -12,16 +12,16 @@
         {% if request.user.is_authenticated %}
             <form action="{% url 'listing' listing.id %}" method="POST">
                 {% csrf_token %}
-                {% if watch %}
-                    <input type="text" name="watchList" value='remove' hidden/>
+                {% if watchList %}
+                    <input type="text" name="watchList" value=0 hidden/>
                     <button type="submit">Remove from Watchlist</button>
                 {% else %}
-                    <input type="text" name="watchList" value='add' hidden/>
+                    <input type="text" name="watchList" value=1 hidden/>
                     <button type="submit">Add to Watchlist</button>
                 {% endif %}
-            </form>    
-        {% else %}
+            </form>
         {% endif %}
+            
         <!-- Close  the listing-->
         {% if request.user.id == listing.user.id %}
             <form action="{% url 'closeListing' listing.id %}" method="POST">
@@ -49,8 +49,10 @@
     <hr>
     <h4>Comments</h4>
     {% for comment in comments %}
-        <p class="font-weight-bold bg-dark text-white">{{ comment.user }}</p>
-        <p>{{ comment.content }}</p>
+        <span class="">{{ comment.user|capfirst }}:</span>
+        <span>{{ comment.content }}</span>
+        </br>
+        <hr>
     {% empty %}
         {% if user.is_authenticated %}    
             <p>Be the first to add a comment</p>
@@ -61,7 +63,7 @@
     {% if user.is_authenticated %}
         <form action="{% url 'comments' listing.id %}" method="POST">
             {% csrf_token %}
-            <input type="text" name="content">
+            {{ commentForm }}
             <input type="submit">
         </form>
     {% endif %}

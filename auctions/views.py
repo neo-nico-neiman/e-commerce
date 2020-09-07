@@ -3,15 +3,43 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-
+from random import choices
 from .models import User, Listing, WatchList, Bids, Comments
+from django import forms
 
+class NewListingForm(forms.Form):
+    categoryChoices = [
+        ('camping', 'Camping'),
+        ('electronics', 'Electronics'),
+        ('food', 'Food'),
+        ('furniture', 'Furniture'),
+        ('garden', 'Garden'),
+        ('others', 'Others'),
+        ('pets', 'Pets'),
+        ('sport', 'Sport')
+    ] 
+    title = forms.CharField(max_length=100)
+    description = forms.CharField(max_length=64)
+    image_url = forms.URLField(max_length=1000, required=False)
+    starting_bid = forms.DecimalField(max_digits=10, decimal_places=2)
+    category = forms.CharField(max_length=64, widget=forms.Select(choices=categoryChoices, attrs={ 'style': 'margin-bottom: 20px; padding: 5px'}))
+
+class NewCommentForm(forms.Form):
+    content = forms.CharField(
+        widget = forms.TextInput(
+            attrs= {
+                'placeholder': 'Add your comment'
+            }
+        ),
+        label=''
+    )
+#Global comment form
+comment = NewCommentForm()
 
 def index(request):
     return render(request, "auctions/index.html", {
         "listings": Listing.objects.all()
     })
-
 
 def login_view(request):
     if request.method == "POST":
@@ -32,11 +60,9 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
@@ -65,84 +91,90 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def new_listing(request):
+    form = NewListingForm()
     if request.method == 'POST':
-        listing = Listing(
-            user = User.objects.get(pk=request.user.id),
-            title = request.POST['title'],
-            description = request.POST['description'],
-            image_url = request.POST['image_url'],
-            starting_bid = request.POST['starting_bid'],
-            category = request.POST['category']
-        )
-        listing.save()
-        return render(request, "auctions/listing_page.html", {
-        'listing': listing,
-        'comments': listing.comment_listing.all()
+        form = NewListingForm(request.POST)
+        if form.is_valid():
+            imagePlaceHolder = [
+                'https://images.unsplash.com/photo-1576158114131-f211996e9137?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1576158113840-43db9ff3ef09?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1576158113928-4c240eaaf360?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1573490647684-928a2454f861?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1578589302979-24448e95ef4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1576158674803-9c3b014d2c11?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1578589318433-39b5de440c3f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1579158951952-94218e428df6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1579818277076-1abc45c9471f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1573490647695-2892d0bf89e7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+            ]
+            # If the user does not provide an image, then include a random image
+            imageURL = choices(imagePlaceHolder)[0] if not len(request.POST['image_url']) else request.POST['image_url']
+            listing = Listing(
+                user = User.objects.get(pk=request.user.id),
+                title = request.POST['title'],
+                description = request.POST['description'],
+                image_url = imageURL,
+                starting_bid = request.POST['starting_bid'],
+                category = request.POST['category']
+            )
+            listing.save()
+            return render(request, "auctions/listing_page.html", {
+                'listing': listing,
+                'comments': listing.comment_listing.all()
+            })
+        else:
+            return render(request, "auctions/create_listing.html", {
+        'form': form
     })
-    return render(request, "auctions/create_listing.html")
+    return render(request, "auctions/create_listing.html", {
+        'form': form
+    })
 
 def listing(request, listingId):
     is_watchList = False
     listing = Listing.objects.get( pk=listingId )
-    try:
-        watchList = WatchList(listing=listing, user=User.objects.get(pk=request.user.id))
-        is_watchList = True
-    except Exception as e:
-        print('ostro')
-        is_watchList = False
+    if request.user.is_authenticated and request.user.watchList:
+        watchListForUser = request.user.watchList.all()
+        for watchList in watchListForUser:
+            if watchList.listing.id == listing.id:
+                is_watchList = True
     if request.method == 'POST':
         try:
-            is_watchList = request.POST['watchList']
-            if is_watchList == 'add':
-                watchList = WatchList(listing=listing, user=User.objects.get(pk=request.user.id))
+            addToWatchList = request.POST['watchList']
+            user = request.user
+            if addToWatchList == '1':
+                watchList = WatchList(listing=listing, user=User.objects.get(pk=user.id))
                 watchList.save()
+                user.watchList.add(watchList)
                 is_watchList = True
             else:
-                watchList = WatchList.objects.get(listing=listing, user=User.objects.get(pk=request.user.id))
+                watchList = WatchList.objects.filter(listing=listing, user=User.objects.get(pk=request.user.id))
                 watchList.delete()
-            
+                is_watchList = False            
         except Exception as e:
             print( e )
-            watchList = WatchList.objects.get(listing=listing, user=User.objects.get(pk=request.user.id))
-            is_watchList = True if watchList else False
-
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
+        'commentForm': comment,
         'comments': listing.comment_listing.all(),
-        'watch': is_watchList
+        'watchList': is_watchList
     })
-    print( 555, is_watchList)
     return render(request, "auctions/listing_page.html", {
         'listing': listing,
+        'commentForm': comment,
         'comments': listing.comment_listing.all(),
-        'watch': is_watchList
+        'watchList': is_watchList
     })
 
-def watchlist( request, listingId):
-    is_watchlist = False
+def watchList(request):
+    
     try:
-        watchList = WatchList.objects.get(listing_id=listingId, user_id=request.user.id)
-        if watchList is not None:
-            is_watchlist = True
+        watchList = request.user.watchList.all()
     except:
-        is_watchlist = False
-
-    listing = Listing.objects.get( pk=listingId )
-    if is_watchlist:
-        watchlists.delete()
-        return render(request, "auctions/listing_page.html", {
-        'listing': listing,
-        'watch': False,
-        'comments': listing.comment_listing.all()
-        })
-    else:  
-        watchList = WatchList(listing_id=listingId, user_id=request.user.id)
-        watchList.save()
-        return render(request, "auctions/listing_page.html", {
-        'listing': listing,
-        'watch': True,
-        'comments': listing.comment_listing.all()
-        } )
+        watchList = None
+    return render(request, "auctions/watchList.html", {
+        'watchList': watchList
+    })
 
 def bid(request, listingId):
     listing = Listing.objects.get(pk=listingId)
@@ -152,7 +184,8 @@ def bid(request, listingId):
         return render(request, "auctions/listing_page.html", {
         'listing': listing,
         'watch': True,
-        'message': f'Your bid must be at least {minimunBid}'
+        'message': f'Your bid must be at least {minimunBid}',
+        'commentForm': comment,
         })
     else:
         listing.current_price=request.POST['bid']
@@ -163,7 +196,8 @@ def bid(request, listingId):
         'listing': listing,
         'watch': True,
         'message': 'Your bid as been accepted!',
-        'comments': listing.comment_listing.all()
+        'comments': listing.comment_listing.all(),
+        'commentForm': comment,
         })
 
 def closeListing(request, listingId):
@@ -172,20 +206,33 @@ def closeListing(request, listingId):
     listing.save()
     return render(request, "auctions/listing_page.html", {
         'listing': listing,
-        'comments': listing.comment_listing.all()
+        'comments': listing.comment_listing.all(),
+        'commentForm': comment,
         })
+
 def comments(request, listingId):
     listing = Listing.objects.get(pk=listingId)
-    comment = Comments(
-        content = request.POST['content'],
-        listing = listing,
-        user = User.objects.get(pk=request.user.id)
-    )
-    comment.save()
-    return render(request, "auctions/listing_page.html", {
-        'listing': listing,
-        'comments': listing.comment_listing.all()
-        })
+    form = NewCommentForm(request.POST)
+    if form.is_valid():
+
+        newComment = Comments(
+            content = request.POST['content'],
+            listing = listing,
+            user = User.objects.get(pk=request.user.id)
+        )
+        newComment.save()
+        return render(request, "auctions/listing_page.html", {
+            'listing': listing,
+            'comments': listing.comment_listing.all(),
+            'commentForm': comment,
+            })
+    else:
+        return render(request, "auctions/listing_page.html", {
+            'listing': listing,
+            'comments': listing.comment_listing.all(),
+            'commentForm': comment,
+            })
+
 def categories(request):
     categories = Listing.objects.filter(category__isnull=False).values('category').distinct()
     return render(request, "auctions/categories.html", {

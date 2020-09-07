@@ -5,7 +5,7 @@
     <div class="container">
         {% for category in categories %}
             <a href="{% url 'category' category.category %}"  class="category">
-                {{ category.category }}
+                {{ category.category|capfirst }}
             </a>
         {% empty %}
             <p>Isn't weird that we none yet?</p>

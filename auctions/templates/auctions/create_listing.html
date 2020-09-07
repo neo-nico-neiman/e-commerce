@@ -2,13 +2,14 @@
 
 {% block body %}
     <h2>Create A New Listing</h2>
-    <form action="{% url 'newListing' %}" method="POST">
+    <form action="{% url 'newListing' %}" method="POST" class="newListing">
         {% csrf_token %}
-        <input type="text" name="title" placeholder="Title"/>
+        {{ form }}
+        {% comment %} <input type="text" name="title" placeholder="Title"/>
         <input type="text" name="description" placeholder="Description"/>
         <input type="url" name="image_url" placeholder="Image URL"/>
         <input type="number" name="starting_bid" placeholder="Starting Bid Price"/>
-        <input type="text" name="category" placeholder="Category"/>
+        <input type="text" name="category" placeholder="Category"/> {% endcomment %}
         <input type="submit"/>
     </form>
 {% endblock %}
